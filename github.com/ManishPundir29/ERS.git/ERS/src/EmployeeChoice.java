@@ -1,6 +1,12 @@
 
 public enum EmployeeChoice {
 
-	  ADD, EDIT, DELETE, VIEW;
+	ADD_EMPLOYEE,
+	EDIT_EMPLOYEE,
+	DELETE_EMPLOYEE, 
+	VIEW_EMPLOYEES,
+	BACK_TO_HOME_PAGE, 
+	LOGOUT,
+	EXIT;
 	
 }

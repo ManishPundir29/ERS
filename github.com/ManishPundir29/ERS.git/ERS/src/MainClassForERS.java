@@ -20,12 +20,12 @@ public class MainClassForERS {
 	
 	public static Scanner sc=new Scanner(System.in);
 	
-	public static  String jdbcUrl = "jdbc:mysql://localhost:3306/empdb";
+	public static  String jdbcUrl = "jdbc:mysql://localhost:3306/ers";
 	public static  String username = "root";
 	public static  String password = "root";
 	public static Connection con = getDatabaseConnection();
 	public static TextIO textIO = TextIoFactory.getTextIO();
-	public static  String sqlForGetUserDetail ="CALL `empdb`.`getUserDetails_sp`(?, ?,?)";
+	public static  String sqlForGetUserDetail ="CALL `ers`.`getUserDetails_sp`(?, ?,?)";
 	public static boolean flag=false;
 	
 	public static void main(String[] args) throws SQLException, IOException {
@@ -36,13 +36,16 @@ public class MainClassForERS {
 	private static void loginForm() throws SQLException, IOException {
 		// login form
 		
-		BufferedReader standardInput
-	    = new BufferedReader(new InputStreamReader(System.in));
+		BufferedReader standardInput  = new BufferedReader(new InputStreamReader(System.in));
 	 
 		
 		LoginMaster loginmaster = new LoginMaster();
 		
+		login(loginmaster);
 		
+	}
+
+	private static void login(LoginMaster loginmaster) throws SQLException, IOException {
 		for(;;) {
 			
 			
@@ -68,42 +71,91 @@ public class MainClassForERS {
 			 break;
 		   }
 		}
-		
 	}
 
-	private static void homePage(String user,LoginMaster loginMaster) throws SQLException {
-		TextIO homepage = TextIoFactory.getTextIO();
-		homepage.getTextTerminal().println("Welcome "+loginMaster.getRole()+", User ID "+loginMaster.getUserid());
+	private static void homePage(String user,LoginMaster loginMaster) throws SQLException, IOException {
+
+		textIO.getTextTerminal().println("=================================================================================");
+		textIO.getTextTerminal().println("Welcome "+loginMaster.getRole()+", User ID "+loginMaster.getUserid());
 		
-		EmployeeChoice empChoice =textIO.newEnumInputReader(EmployeeChoice.class).read("----------Employee Form------");
-		switch (empChoice) {
-		case ADD:
-			homepage.getTextTerminal().println("You Selected:"+empChoice);
-			doYourTaskForAdd();
+		textIO.getTextTerminal().println("MENU=>");
+		
+		MainMenu mainMenu =textIO.newEnumInputReader(MainMenu.class).read("----------Main Menu------");
+		switch (mainMenu) {
+		case EMPLOYEE:
+			goToEmployee(user, loginMaster);
 			break;
 
-		case EDIT:
-			homepage.getTextTerminal().println("You Selected:"+empChoice);
-			doYourTaskForEdit();
+		case DEPARTMENT:
+			goToDepartment(user, loginMaster);
 			break;
-
-		case DELETE:
-			homepage.getTextTerminal().println("You Selected:"+empChoice);
-			doYourTaskForDelete();
+			
+		case EXIT:
+			textIO.getTextTerminal().dispose();
 			break;
-		
-		case VIEW:
-			homepage.getTextTerminal().println("You Selected:"+empChoice);
-			doYourTaskForView();
-			break;
-	
+			
 		default:
-			homepage.getTextTerminal().println("You Selected:"+empChoice);
 			break;
 		}
 		
-		homepage.getTextTerminal().println("You Selected:"+empChoice);
+		
+		//EmployeeChoice empChoice = extracted(user, loginMaster);
+		
+	//	textIO.getTextTerminal().println("You Selected:"+empChoice);
 	
+		
+	}
+
+	private static void goToDepartment(String user, LoginMaster loginMaster) {
+		
+		DepartmentChoice empChoice =textIO.newEnumInputReader(DepartmentChoice.class).read("----------Department Form------");
+		
+	}
+
+	private static void goToEmployee(String user, LoginMaster loginMaster) throws SQLException, IOException {
+		//EmployeeChoice empChoice = extracted(user, loginMaster);
+		EmployeeChoice empChoice =textIO.newEnumInputReader(EmployeeChoice.class).read("----------Employee Form------");
+		switch (empChoice) {
+		case ADD_EMPLOYEE:
+			textIO.getTextTerminal().println("You Selected:"+empChoice);
+			doYourTaskForAdd();
+			break;
+
+		case EDIT_EMPLOYEE:
+			textIO.getTextTerminal().println("You Selected:"+empChoice);
+			doYourTaskForEdit();
+			break;
+
+		case DELETE_EMPLOYEE:
+			textIO.getTextTerminal().println("You Selected:"+empChoice);
+			doYourTaskForDelete();
+			break;
+		
+	
+		case VIEW_EMPLOYEES:
+			textIO.getTextTerminal().println("You Selected:"+empChoice);
+			doYourTaskForView();
+			break;
+	
+		case BACK_TO_HOME_PAGE:
+			textIO.getTextTerminal().println("You Selected:"+empChoice);
+			homePage(user, loginMaster);
+			break;
+			
+		case LOGOUT:
+			textIO.getTextTerminal().println("You Selected:"+empChoice);
+			loginForm();
+			break;
+			
+		case EXIT:
+			textIO.getTextTerminal().dispose();
+			break;
+			
+		default:
+			textIO.getTextTerminal().println("Invalid Input.. Try again");
+			homePage(user, loginMaster);
+			break;
+		}
 		
 	}
 
@@ -112,10 +164,12 @@ public class MainClassForERS {
 
 		Statement stmt=con.createStatement();  
 		ResultSet rs=stmt.executeQuery("select * from employees");  
+		if(rs!=null) {
+			textIO.getTextTerminal().println("Emp ID\tFirst Name\tLast Name\tDOB\t\tEmail\tDept ID");	
+		}
 		
-		while(rs.next())  {
-		new DBTablePrinter().printTable(con, "employees");  
-
+		while(rs.next())  { 
+			textIO.getTextTerminal().println(rs.getInt("empid")+"\t"+rs.getString("firstname")+"\t\t"+rs.getString("lastname")+"\t\t"+rs.getString("dob").substring(0,10)+"\t"+rs.getString("email")+"\t"+rs.getInt("department_id"));	
 		}
 		
 		
@@ -149,13 +203,14 @@ public class MainClassForERS {
 		textIO.getTextTerminal().printf("Thanks %s, you are logged in.\n",rs.getInt(1));  
 		return true;
 		}
+		textIO.getTextTerminal().printf("Invalid Userid/Password.. Try again..\n");  
 		return false;
 	}
 	
 	public static Connection getDatabaseConnection() {
 		Connection conn =null;
 		try {
-		Class.forName("com.mysql.cj.jdbc.Driver");  
+		Class.forName("com.mysql.jdbc.Driver");  
 		conn=DriverManager.getConnection( jdbcUrl,username,password);  
 		}catch (Exception e) {
 			e.printStackTrace();
