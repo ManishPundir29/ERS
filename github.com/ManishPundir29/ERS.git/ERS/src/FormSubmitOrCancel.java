@@ -1,4 +1,4 @@
 
 public enum FormSubmitOrCancel {
-	SUBMIT,CANCEL,EXIT;
+	SUBMIT,CANCEL,GO_BACK_TO_HOME_PAGE, LOGOUT,EXIT ;
 }

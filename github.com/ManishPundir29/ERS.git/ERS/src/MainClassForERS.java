@@ -119,29 +119,29 @@ public class MainClassForERS {
 		EmployeeChoice empChoice =textIO.newEnumInputReader(EmployeeChoice.class).read("----------Employee Form------");
 		switch (empChoice) {
 		case ADD_EMPLOYEE:
-			textIO.getTextTerminal().println("You Selected:"+empChoice);
+			textIO.getTextTerminal().println("Add New Emplyee Here....");
 			doYourTaskForAdd(user,loginMaster);
 			break;
 
 		case EDIT_EMPLOYEE:
-			textIO.getTextTerminal().println("You Selected:"+empChoice);
+			textIO.getTextTerminal().println("Edit/Update Existed Emplyee Here....");
 			doYourTaskForEdit(user,loginMaster);
 			break;
 
 		case DELETE_EMPLOYEE:
-			textIO.getTextTerminal().println("You Selected:"+empChoice);
+			textIO.getTextTerminal().println("Delete Employee Data Here.");
 			doYourTaskForDelete(user,loginMaster);
 			break;
 		
 	
 		case VIEW_EMPLOYEES:
-			textIO.getTextTerminal().println("You Selected:"+empChoice);
+			textIO.getTextTerminal().println("Show all Employee Details here");
 			doYourTaskForView();
 			goToEmployee(user, loginMaster);
 			break;
 	
 		case BACK_TO_HOME_PAGE:
-			textIO.getTextTerminal().println("You Selected:"+empChoice);
+			textIO.getTextTerminal().println("Back To Home Page....");
 			homePage(user, loginMaster);
 			break;
 			
@@ -183,12 +183,48 @@ public class MainClassForERS {
 		
 	}
 
-	private static void doYourTaskForEdit(String user, LoginMaster loginMaster) {
-		// TODO Auto-generated method stub
+	private static void doYourTaskForEdit(String user, LoginMaster loginMaster) throws SQLException, IOException {
+
+		doYourTaskForView();
+		ChooseForEdit empChoice =textIO.newEnumInputReader(ChooseForEdit.class).read("----------Choose HERE------");
+		switch (empChoice) {
+		case EMPID:
+			editGivenEmployee();
+			break;
+
+		case GO_BACK_TO_HOME_PAGE:
+			textIO.getTextTerminal().println("Back To Home Page....");
+			homePage(user, loginMaster);
+			break;
+			
+		case LOGOUT:
+			textIO.getTextTerminal().println("you have securly logged out");
+			loginForm();
+			break;
+			
+		case EXIT:
+			textIO.getTextTerminal().dispose();
+			break;
+			
+		default:
+			textIO.getTextTerminal().println("Invalid Input.. Try again");
+			homePage(user, loginMaster);
+			break;
+		}
 		
 	}
 
-	private static int doYourTaskForAdd(String user, LoginMaster loginMaster) throws SQLException {
+	private static void editGivenEmployee() {
+		Employee emp = new Employee();
+		// make the database connection
+		emp.setEmpid(textIO.newIntInputReader()
+		        .read("Employee ID"));
+		
+		textIO.getTextTerminal().printf("Fetching the employee detail of empid:"+emp.getEmpid());
+		
+	}
+
+	private static int doYourTaskForAdd(String user, LoginMaster loginMaster) throws SQLException, IOException {
 		
 		int i=-1;
 		
@@ -211,11 +247,25 @@ public class MainClassForERS {
 		switch (empChoice) {
 		case SUBMIT:
 			saveEmloyee(emp);
-			doYourTaskForView();
+			textIO.getTextTerminal().printf("Sucessfully added a new emplyee..");
+			doYourTaskForAdd(user,loginMaster);
 			break;
 
 		case CANCEL:
 			doYourTaskForAdd(user,loginMaster);
+			break;
+			
+		case GO_BACK_TO_HOME_PAGE:
+			homePage(user, loginMaster);
+			break;
+			
+		case LOGOUT:
+			textIO.getTextTerminal().println("you have securly logged out");
+			loginForm();
+			break;
+			
+		case EXIT:
+			textIO.dispose();
 			break;
 			
 		default:
@@ -239,7 +289,7 @@ public class MainClassForERS {
 		stmt.setInt(5,emp.getDepartment());//1 specifies the first parameter in the query  
 		
 		 i=stmt.executeUpdate();  
-		System.out.println(i+" records inserted");
+		 textIO.getTextTerminal().printf(i+" records inserted");
 	}
 
 	private static boolean checkUserIsValid(String userid, String password,LoginMaster loginMaster) throws SQLException {

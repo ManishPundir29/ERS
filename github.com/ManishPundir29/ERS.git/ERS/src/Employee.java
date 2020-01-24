@@ -1,6 +1,7 @@
 
 public class Employee {
 
+	private int empid;
 	private String firstname;
 	private String lastname;
 	private String dob;
@@ -44,6 +45,14 @@ public class Employee {
 	public String toString() {
 		return "Employee [firstname=" + firstname + ", lastname=" + lastname + ", dob=" + dob + ", email=" + email
 				+ ", department=" + department + "]";
+	}
+
+	public int getEmpid() {
+		return empid;
+	}
+
+	public void setEmpid(int empid) {
+		this.empid = empid;
 	}
 	
 }
