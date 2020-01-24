@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -20,8 +21,8 @@ public class MainClassForERS {
 	
 	public static Scanner sc=new Scanner(System.in);
 	
-	public static  String jdbcUrl = "jdbc:mysql://localhost:3306/ers";
-	public static  String username = "root";
+	public static  String jdbcUrl = "jdbc:oracle:thin:@localhost:1521:xe";
+	public static  String username = "empdb";
 	public static  String password = "root";
 	public static Connection con = getDatabaseConnection();
 	public static TextIO textIO = TextIoFactory.getTextIO();
@@ -42,6 +43,7 @@ public class MainClassForERS {
 		LoginMaster loginmaster = new LoginMaster();
 		
 		login(loginmaster);
+		
 		
 	}
 
@@ -118,23 +120,24 @@ public class MainClassForERS {
 		switch (empChoice) {
 		case ADD_EMPLOYEE:
 			textIO.getTextTerminal().println("You Selected:"+empChoice);
-			doYourTaskForAdd();
+			doYourTaskForAdd(user,loginMaster);
 			break;
 
 		case EDIT_EMPLOYEE:
 			textIO.getTextTerminal().println("You Selected:"+empChoice);
-			doYourTaskForEdit();
+			doYourTaskForEdit(user,loginMaster);
 			break;
 
 		case DELETE_EMPLOYEE:
 			textIO.getTextTerminal().println("You Selected:"+empChoice);
-			doYourTaskForDelete();
+			doYourTaskForDelete(user,loginMaster);
 			break;
 		
 	
 		case VIEW_EMPLOYEES:
 			textIO.getTextTerminal().println("You Selected:"+empChoice);
 			doYourTaskForView();
+			goToEmployee(user, loginMaster);
 			break;
 	
 		case BACK_TO_HOME_PAGE:
@@ -143,7 +146,7 @@ public class MainClassForERS {
 			break;
 			
 		case LOGOUT:
-			textIO.getTextTerminal().println("You Selected:"+empChoice);
+			textIO.getTextTerminal().println("you have securly logged out");
 			loginForm();
 			break;
 			
@@ -175,19 +178,68 @@ public class MainClassForERS {
 		
 	}
 
-	private static void doYourTaskForDelete() {
+	private static void doYourTaskForDelete(String user, LoginMaster loginMaster) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	private static void doYourTaskForEdit() {
+	private static void doYourTaskForEdit(String user, LoginMaster loginMaster) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	private static void doYourTaskForAdd() {
-		// TODO Auto-generated method stub
+	private static int doYourTaskForAdd(String user, LoginMaster loginMaster) throws SQLException {
 		
+		int i=-1;
+		
+		Employee emp = new Employee();
+		// make the database connection
+		emp.setFirstname(textIO.newStringInputReader()
+		        .read("First Name"));
+		
+		emp.setLastname( textIO.newStringInputReader()
+		        .read("Last Name"));
+		
+		emp.setDob(textIO.newStringInputReader()
+		        .read("DOB"));
+		emp.setEmail(textIO.newStringInputReader()
+		        .read("Email"));
+		emp.setDepartment(textIO.newIntInputReader()
+		        .read("Department"));
+		
+		FormSubmitOrCancel empChoice =textIO.newEnumInputReader(FormSubmitOrCancel.class).read("-----------------------");
+		switch (empChoice) {
+		case SUBMIT:
+			saveEmloyee(emp);
+			doYourTaskForView();
+			break;
+
+		case CANCEL:
+			doYourTaskForAdd(user,loginMaster);
+			break;
+			
+		default:
+			break;
+		}
+		
+	
+		//textIO.getTextTerminal().printf("Invalid Userid/Password.. Try again..\n");  
+		return i;
+	}
+
+	private static void saveEmloyee(Employee emp) throws SQLException {
+		int i;
+		//Statement stmt=con.createStatement();  
+		//ResultSet rs=stmt.executeQuery("insert into employees (firstname,lastname,dob,email,department_id) values (?,?,?,?,?)");  
+		PreparedStatement stmt=con.prepareStatement("insert into employees (empid,firstname,lastname,dob,email,department_id) values (EMPLOYEES_SEQ.NEXTVAL,?,?,?,?,?)");  
+		stmt.setString(1,emp.getFirstname());
+		stmt.setString(2, emp.getLastname());
+		stmt.setString(3, emp.getDob());
+		stmt.setString(4, emp.getEmail());
+		stmt.setInt(5,emp.getDepartment());//1 specifies the first parameter in the query  
+		
+		 i=stmt.executeUpdate();  
+		System.out.println(i+" records inserted");
 	}
 
 	private static boolean checkUserIsValid(String userid, String password,LoginMaster loginMaster) throws SQLException {
@@ -210,7 +262,7 @@ public class MainClassForERS {
 	public static Connection getDatabaseConnection() {
 		Connection conn =null;
 		try {
-		Class.forName("com.mysql.jdbc.Driver");  
+		Class.forName("oracle.jdbc.driver.OracleDriver");  
 		conn=DriverManager.getConnection( jdbcUrl,username,password);  
 		}catch (Exception e) {
 			e.printStackTrace();
