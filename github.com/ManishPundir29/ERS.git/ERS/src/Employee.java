@@ -6,7 +6,7 @@ public class Employee {
 	private String lastname;
 	private String dob;
 	private String email;
-	private int department;
+	private String department;
 	
 	public Employee() {}
 	
@@ -34,10 +34,10 @@ public class Employee {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	public int getDepartment() {
+	public String getDepartment() {
 		return department;
 	}
-	public void setDepartment(int department) {
+	public void setDepartment(String department) {
 		this.department = department;
 	}
 
