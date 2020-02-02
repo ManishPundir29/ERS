@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -19,7 +20,7 @@ public class RLForm {
 		//
 
 		RLChoiceForAdmin empChoice = textIO.newEnumInputReader(RLChoiceForAdmin.class)
-				.read("********************** Regulation/Legislation HOME PAGE***************************");
+				.read("\nRegulation/Legislation MENU:");
 		switch (empChoice) {
 
 		
@@ -33,7 +34,7 @@ public class RLForm {
 			goToRL(loginMaster, textIO);
 			break;
 			
-		case UPDATE_COMMENT:
+		case UPDATE_RL:
 			updateComment(loginMaster, textIO);
 			goToRL(loginMaster, textIO);
 			break;
@@ -43,7 +44,7 @@ public class RLForm {
 			break;
 
 		case LOGOUT:
-			textIO.getTextTerminal().println("YOU HAVE SUCESSFULLY LOGGED OUT!");
+			textIO.getTextTerminal().printf("\nYOU HAVE SUCESSFULLY LOGGED OUT!\n----------------------------");
 			MainClassForERS.loginForm();
 			break;
 
@@ -69,13 +70,13 @@ public class RLForm {
 		
 		List<Integer> list = new ArrayList<>();
 		int empid = 0;
-		try (Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "empdb", "root");
+		try (Connection conn = DriverManager.getConnection(MainClassForERS.getPropertyValue("db.url"),MainClassForERS.getPropertyValue("db.username"),MainClassForERS.getPropertyValue("db.password"));
 				Statement statement = conn.createStatement();
 				PreparedStatement preparedStatement = conn.prepareStatement(SQL_INSERT)) {
 
 			ResultSet resultSet = preparedStatement.executeQuery();
 
-			textIO.getTextTerminal().println("************* COMPLIANCE LIST ***************");
+			textIO.getTextTerminal().printf("\nCOMPLIANCE LIST\n--------------\n");
 
 			while (resultSet.next()) {
 				if(!list.contains(resultSet.getInt("empid")))
@@ -91,13 +92,12 @@ public class RLForm {
 				
 				list.add(resultSet.getInt("empid"));
 			}
-			textIO.getTextTerminal().println("**********************************************");
 			
 			
 			
 			boolean flag = true;
 			do {
-				long choose = textIO.newIntInputReader().read("*************************************\nSELECT THE EMPLOYEE ID:");
+				long choose = textIO.newIntInputReader().read("---------------------------\nSELECT THE EMPLOYEE ID:");
 				
 				for (Integer emp : list) {
 					if (emp == (int)choose) {
@@ -106,7 +106,7 @@ public class RLForm {
 					}
 				}
 				if(flag==true)
-				textIO.getTextTerminal().printf("WRONG CHOICE. CHOOSE AGAIN...");
+				textIO.getTextTerminal().printf("\nWRONG CHOICE. CHOOSE AGAIN...");
 
 			} while (flag);
 			
@@ -116,12 +116,12 @@ public class RLForm {
 			System.err.format("SQL State: %s\t%s", e.getSQLState(), e.getMessage());
 			e.printStackTrace();
 			textIO.getTextTerminal()
-					.printf("Something went wrong while getting details of all COMPLIANCE.. Try again..\n");
+					.printf("\nSomething went wrong while getting details of all COMPLIANCE.. Try again..\n");
 			// return false;
 		} catch (Exception e) {
 			e.printStackTrace();
 			textIO.getTextTerminal()
-					.printf("Something went wrong while getting details of all COMPLIANCE.. Try again..\n");
+					.printf("\nSomething went wrong while getting details of all COMPLIANCE.. Try again..\n");
 			// return false;
 		}
 		
@@ -134,24 +134,26 @@ public class RLForm {
 
 	private static void updatecommentstatusreportid(int empid,int id, TextIO textIO,LoginMaster loginMaster) throws SQLException, IOException, ParseException {
 		
-		StatusReportCommentChoose reportCommentChoose = textIO.newEnumInputReader(StatusReportCommentChoose.class).read("UPDATE COMMENTS AND DATE HERE:");
+		StatusReportCommentChoose reportCommentChoose = textIO.newEnumInputReader(StatusReportCommentChoose.class).read("\nUPDATE COMMENTS AND DATE HERE:");
 		switch (reportCommentChoose) {
 		case UPDATE_COMMENT:
-			updateSatus(id,loginMaster, textIO);
-			updatecommentanddatebyempid(empid, textIO, loginMaster);		
+			updateStatus(id,loginMaster, textIO);
+			goToRL(loginMaster, textIO);
+		//	updatecommentanddatebyempid(empid, textIO, loginMaster);		
 			break;
 			
 		case UPDATE_DATE:
 			updateDate(id,loginMaster, textIO);
-			updatecommentanddatebyempid(empid, textIO, loginMaster);
+			goToRL(loginMaster, textIO);
+			//updatecommentanddatebyempid(empid, textIO, loginMaster);
 			break;
 
 		case BACK_TO_MAIN_MENU:
-			HomePageForAdmin.homePageForAdmin(loginMaster, textIO);
+			MainClassForERS.homePage(loginMaster);
 			break;
 
 		case LOGOUT:
-			textIO.getTextTerminal().println("YOU HAVE SUCESSFULLY LOGGED OUT!");
+			textIO.getTextTerminal().printf("\nYOU HAVE SUCESSFULLY LOGGED OUT!\n----------------------------");
 			MainClassForERS.loginForm();
 			break;
 
@@ -182,7 +184,7 @@ public class RLForm {
 				String SQL_UPDATE="update statusreport set createdate=? where statusrptid=?";
 				
 				
-				try (Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "empdb", "root");
+				try (Connection conn = DriverManager.getConnection(MainClassForERS.getPropertyValue("db.url"),MainClassForERS.getPropertyValue("db.username"),MainClassForERS.getPropertyValue("db.password"));
 						Statement statement = conn.createStatement();
 						PreparedStatement preparedStatement = conn.prepareStatement(SQL_UPDATE)) {
 					
@@ -193,10 +195,10 @@ public class RLForm {
 			            int row = preparedStatement.executeUpdate();
 
 			            if(row==1) {
-			            	textIO.getTextTerminal().printf("CREATED DATE HAS BEEN UPDATED SUCESSFULLY\n"); 
+			            	textIO.getTextTerminal().printf("\nCREATED DATE HAS BEEN UPDATED SUCESSFULLY\n---------------------------------------"); 
 			            }
 			            else {
-			 	            textIO.getTextTerminal().printf("SOMETHING WENT WRONG. TRY AGAIN..\n");  
+			 	            textIO.getTextTerminal().printf("\nSOMETHING WENT WRONG. TRY AGAIN..\n");  
 			 				//return false;
 			            }
 			            // rows affected
@@ -204,18 +206,18 @@ public class RLForm {
 					System.err.format("SQL State: %s\t%s", e.getSQLState(), e.getMessage());
 					e.printStackTrace();
 					textIO.getTextTerminal()
-							.printf("Something went wrong while getting details of all COMPLIANCE.. Try again..\n");
+							.printf("\nSomething went wrong while getting details of all COMPLIANCE.. Try again..\n");
 					// return false;
 				} catch (Exception e) {
 					e.printStackTrace();
 					textIO.getTextTerminal()
-							.printf("Something went wrong while getting details of all COMPLIANCE.. Try again..\n");
+							.printf("\nSomething went wrong while getting details of all COMPLIANCE.. Try again..\n");
 					// return false;
 				}
 		
 	}
 
-	private static void updateSatus(int id, LoginMaster loginMaster, TextIO textIO) {
+	private static void updateStatus(int id, LoginMaster loginMaster, TextIO textIO) {
 
 		String status="";
 		
@@ -227,7 +229,7 @@ public class RLForm {
 				String SQL_UPDATE="update statusreport set comments=? where statusrptid=?;";
 				
 				
-				try (Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "empdb", "root");
+				try (Connection conn = DriverManager.getConnection(MainClassForERS.getPropertyValue("db.url"),MainClassForERS.getPropertyValue("db.username"),MainClassForERS.getPropertyValue("db.password"));
 						Statement statement = conn.createStatement();
 						PreparedStatement preparedStatement = conn.prepareStatement(SQL_UPDATE)) {
 					
@@ -238,10 +240,10 @@ public class RLForm {
 			            int row = preparedStatement.executeUpdate();
 
 			            if(row==1) {
-			            	textIO.getTextTerminal().printf("COMMENT HAS BEEN UPDATED SUCESSFULLY\n"); 
+			            	textIO.getTextTerminal().printf("\nCOMMENT HAS BEEN UPDATED SUCESSFULLY\n--------------------------------"); 
 			            }
 			            else {
-			 	            textIO.getTextTerminal().printf("SOMETHING WENT WRONG. TRY AGAIN..\n");  
+			 	            textIO.getTextTerminal().printf("\nSOMETHING WENT WRONG. TRY AGAIN..\n");  
 			 				//return false;
 			            }
 			            // rows affected
@@ -249,12 +251,12 @@ public class RLForm {
 					System.err.format("SQL State: %s\t%s", e.getSQLState(), e.getMessage());
 					e.printStackTrace();
 					textIO.getTextTerminal()
-							.printf("Something went wrong while getting details of all COMPLIANCE.. Try again..\n");
+							.printf("\nSomething went wrong while getting details of all COMPLIANCE.. Try again..\n");
 					// return false;
 				} catch (Exception e) {
 					e.printStackTrace();
 					textIO.getTextTerminal()
-							.printf("Something went wrong while getting details of all COMPLIANCE.. Try again..\n");
+							.printf("\nSomething went wrong while getting details of all COMPLIANCE.. Try again..\n");
 					// return false;
 				}
 	}
@@ -272,7 +274,7 @@ public class RLForm {
 		// mandatoty field
 		String date=null;
 		do{
-		date = textIO.newStringInputReader().read("Creation Date (yyyy/MM/dd)");
+		date = textIO.newStringInputReader().read("Creation Date (eg. yyyy/MM/dd)");
 		}while(!Example.validateJavaDate(date,textIO));
 		
 		
@@ -285,7 +287,7 @@ public class RLForm {
 		// save into the COMPLIANCE
 		String SQL_INSERT = "insert into COMPLIANCE values (COMPLIANCE_SEQ.NEXTVAL,?,?,sysdate,?)";
 
-		try (Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "empdb", "root");
+		try (Connection conn = DriverManager.getConnection(MainClassForERS.getPropertyValue("db.url"),MainClassForERS.getPropertyValue("db.username"),MainClassForERS.getPropertyValue("db.password"));
 				Statement statement = conn.createStatement();
 				PreparedStatement preparedStatement = conn.prepareStatement(SQL_INSERT)) {
 
@@ -300,21 +302,21 @@ public class RLForm {
 			System.out.println(row); // 1
 
 			if (row == 1) {
-				textIO.getTextTerminal().printf("New Regulation/Legislation has been created sucessfully..\n");
+				textIO.getTextTerminal().printf("\nNew Regulation/Legislation has been created sucessfully\n--------------------------------------------------\n");
 			} else {
 
-				textIO.getTextTerminal().printf("Problem occured while adding Regulation/Legislation.. Try again..\n");
+				textIO.getTextTerminal().printf("\nProblem occured while adding Regulation/Legislation.. Try again..\n");
 				// return false;
 			}
 
 		} catch (SQLException e) {
 			System.err.format("SQL State: %s\t%s", e.getSQLState(), e.getMessage());
 			e.printStackTrace();
-			textIO.getTextTerminal().printf("Problem occured while adding Regulation/Legislation.. Try again..\n");
+			textIO.getTextTerminal().printf("\nProblem occured while adding Regulation/Legislation.. Try again..\n");
 			// return false;
 		} catch (Exception e) {
 			e.printStackTrace();
-			textIO.getTextTerminal().printf("Problem occured while adding Regulation/Legislation.. Try again..\n");
+			textIO.getTextTerminal().printf("\nProblem occured while adding Regulation/Legislation.. Try again..\n");
 			// return false;
 		}
 
@@ -322,49 +324,54 @@ public class RLForm {
 
 	static void viewRL(LoginMaster loginMaster,TextIO textIO) {
 
-		String SQL_INSERT="select c.complianceid,c.rltype,c.details as description,c.createdate,d.department_nm,s.comments,s.empid from statusreport s\r\n" + 
-				" left join \r\n" + 
-				" COMPLIANCE c on (c.complianceid = s.complianceid)\r\n" + 
-				" left join \r\n" + 
-				" department d on (c.department_id = d.department_id) order by s.empid ";
 		
-		List<Integer> list = new ArrayList<>();
+		String runFunction = "{?= call getAllRL_func()}";
+
+        try (Connection conn = DriverManager.getConnection(MainClassForERS.getPropertyValue("db.url"),MainClassForERS.getPropertyValue("db.username"),MainClassForERS.getPropertyValue("db.password"));
+             Statement statement = conn.createStatement();
+             CallableStatement cs = conn.prepareCall(runFunction);
+        ) {
+
+            // We must be inside a transaction for cursors to work.
+            conn.setAutoCommit(false);
+
+            // register output
+            
+            cs.registerOutParameter(1, oracle.jdbc.OracleTypes.CURSOR);
+
+            // run function
+            cs.execute();
+            // get refcursor and convert it to ResultSet
+            ResultSet resultSet = (ResultSet) cs.getObject(1);
+            
+            textIO.getTextTerminal().println("\nCOMPLIANCE DETAILS\n--------------------\n");
+            while (resultSet.next()) {
+            	ComplianceDetails complianceDetails = new ComplianceDetails();
+                complianceDetails.setCompliance_id(resultSet.getInt("complianceid"));
+                complianceDetails.setDepartment_id(resultSet.getInt("department_id"));
+                complianceDetails.setDepartment_nm(resultSet.getString("department_nm"));
+                complianceDetails.setRltype(resultSet.getString("rltype"));
+                complianceDetails.setDetails(resultSet.getString("details"));
+                complianceDetails.setCreateddate(resultSet.getDate("createdate"));
+                complianceDetails.setEmpcount(resultSet.getInt("empcount"));
+                complianceDetails.setStatuscount(resultSet.getInt("statuscount"));
+                textIO.getTextTerminal().println(complianceDetails.toString());
+            }
+
+        } catch (SQLException e) {
+            System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+            textIO.getTextTerminal()
+			.printf("\nSomething went wrong while getting details of all COMPLIANCE.. Try again..\n");
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            textIO.getTextTerminal()
+			.printf("\nSomething went wrong while getting details of all COMPLIANCE.. Try again..\n");
+        }
 		
-		try (Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "empdb", "root");
-				Statement statement = conn.createStatement();
-				PreparedStatement preparedStatement = conn.prepareStatement(SQL_INSERT)) {
+		
+		
 
-			ResultSet resultSet = preparedStatement.executeQuery();
-
-			textIO.getTextTerminal().println("************* COMPLIANCE LIST ***************");
-
-			while (resultSet.next()) {
-				if(!list.contains(resultSet.getInt("empid")))
-				textIO.getTextTerminal().println("EMPLOYEE ID :: "+resultSet.getInt("empid"));
-				RegulationLegislationView obj = new RegulationLegislationView();
-				obj.setRlId(resultSet.getInt("complianceid"));
-				obj.setRlType(resultSet.getString("RLTYPE"));
-				obj.setDescription(resultSet.getString("description"));
-				obj.setCreationDate(resultSet.getDate("CREATEDATE"));
-				obj.setDepartment(resultSet.getString("department_nm"));
-				obj.setStatus(resultSet.getString("comments"));
-				textIO.getTextTerminal().println(obj.toString());
-				
-				list.add(resultSet.getInt("empid"));
-			}
-			textIO.getTextTerminal().println("**********************************************");
-		} catch (SQLException e) {
-			System.err.format("SQL State: %s\t%s", e.getSQLState(), e.getMessage());
-			e.printStackTrace();
-			textIO.getTextTerminal()
-					.printf("Something went wrong while getting details of all COMPLIANCE.. Try again..\n");
-			// return false;
-		} catch (Exception e) {
-			e.printStackTrace();
-			textIO.getTextTerminal()
-					.printf("Something went wrong while getting details of all COMPLIANCE.. Try again..\n");
-			// return false;
-		}
 	}
 	
 	public static void updatecommentanddatebyempid(int empid,TextIO textIO,LoginMaster loginMaster) {
@@ -373,7 +380,7 @@ public class RLForm {
 				" department d on (d.department_id = s.department_id) where s.empid=?";
 		
 		List<Integer> list = new ArrayList<>();
-		try (Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "empdb", "root");
+		try (Connection conn = DriverManager.getConnection(MainClassForERS.getPropertyValue("db.url"),MainClassForERS.getPropertyValue("db.username"),MainClassForERS.getPropertyValue("db.password"));
 				Statement statement = conn.createStatement();
 				PreparedStatement preparedStatement = conn.prepareStatement(SQL_INSERT)) {
 			
@@ -381,8 +388,7 @@ public class RLForm {
 
 			ResultSet resultSet = preparedStatement.executeQuery();
 			list.clear();
-			textIO.getTextTerminal().println("**********************************************");
-			textIO.getTextTerminal().println("STATUS REPORT OF EMPLOYEE ID :: "+empid);
+			textIO.getTextTerminal().println("\nSTATUS REPORT OF EMPLOYEE ID :: "+empid+"\n------------------------------------");
 			while (resultSet.next()) {
 				StatusReport obj = new StatusReport();
 				obj.setComplianceid(resultSet.getInt("complianceid"));
@@ -394,7 +400,6 @@ public class RLForm {
 				textIO.getTextTerminal().println(obj.toString());
 				list.add(resultSet.getInt("statusrptid"));
 			}
-			textIO.getTextTerminal().println("**********************************************");
 			
 			int id = 0;
 			boolean flag = true;
@@ -408,7 +413,7 @@ public class RLForm {
 					}
 				}
 				if(flag==true)
-				textIO.getTextTerminal().printf("WRONG CHOICE. CHOOSE AGAIN...");
+				textIO.getTextTerminal().printf("\nWRONG CHOICE. CHOOSE AGAIN...");
 
 			} while (flag);
 			
@@ -419,12 +424,12 @@ public class RLForm {
 			System.err.format("SQL State: %s\t%s", e.getSQLState(), e.getMessage());
 			e.printStackTrace();
 			textIO.getTextTerminal()
-					.printf("Something went wrong while getting details of all COMPLIANCE.. Try again..\n");
+					.printf("\nSomething went wrong while getting details of all COMPLIANCE.. Try again..\n");
 			// return false;
 		} catch (Exception e) {
 			e.printStackTrace();
 			textIO.getTextTerminal()
-					.printf("Something went wrong while getting details of all COMPLIANCE.. Try again..\n");
+					.printf("\nSomething went wrong while getting details of all COMPLIANCE.. Try again..\n");
 			// return false;
 		}
 	}

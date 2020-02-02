@@ -52,7 +52,7 @@ private static void viewDepartment(LoginMaster loginMaster,TextIO textIO) {
 		String SQL_INSERT = "select * from department";
 		
 		 try (Connection conn = DriverManager.getConnection(
-				 "jdbc:oracle:thin:@localhost:1521:xe", "empdb", "root");
+				 MainClassForERS.getPropertyValue("db.url"),MainClassForERS.getPropertyValue("db.username"),MainClassForERS.getPropertyValue("db.password"));
 	             Statement statement = conn.createStatement();
 				 PreparedStatement preparedStatement = conn.prepareStatement(SQL_INSERT)) {
 
@@ -101,7 +101,7 @@ private static void viewDepartment(LoginMaster loginMaster,TextIO textIO) {
 		String SQL_INSERT = "insert into department values (DEPARTMENT_SEQ.NEXTVAL,?)";
 		
 		 try (Connection conn = DriverManager.getConnection(
-				 "jdbc:oracle:thin:@localhost:1521:xe", "empdb", "root");
+				 MainClassForERS.getPropertyValue("db.url"),MainClassForERS.getPropertyValue("db.username"),MainClassForERS.getPropertyValue("db.password"));
 	             Statement statement = conn.createStatement();
 				 PreparedStatement preparedStatement = conn.prepareStatement(SQL_INSERT)) {
 

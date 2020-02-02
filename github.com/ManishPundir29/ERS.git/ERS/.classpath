@@ -2,13 +2,13 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/Users/Manish Pundir/Downloads/iotest/jar_files (1)/commons-lang3-3.5.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Manish Pundir/Downloads/iotest/jar_files (1)/gson-2.8.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Manish Pundir/Downloads/iotest/jar_files (1)/jline-2.14.5.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Manish Pundir/Downloads/iotest/jar_files (1)/slf4j-api-1.7.25.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Manish Pundir/Downloads/iotest/jar_files (1)/text-io-3.1.3.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Manish Pundir/Downloads/iotest/jar_files (1)/text-io-web-3.1.3.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Manish Pundir/Downloads/mysql-connector-java-5.1.44.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Manish Pundir/Downloads/ojdbc6.jar"/>
+	<classpathentry kind="lib" path="C:/Users/manis/Downloads/textio/commons-lang3-3.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/manis/Downloads/textio/gson-2.8.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/manis/Downloads/textio/jline-2.14.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/manis/Downloads/textio/slf4j-api-1.7.25.jar"/>
+	<classpathentry kind="lib" path="C:/Users/manis/Downloads/textio/text-io-3.1.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/manis/Downloads/textio/text-io-web-3.1.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/manis/Downloads/ojdbc6.jar"/>
+	<classpathentry kind="lib" path="C:/Users/manis/Downloads/j-text-utils-0.3.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

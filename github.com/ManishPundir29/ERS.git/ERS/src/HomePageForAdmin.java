@@ -27,6 +27,7 @@ public class HomePageForAdmin {
 			RLForm.goToRL( loginMaster, textIO);
 			break;
 			
+	//		Compliance Tracking
 		case LOGOUT:
 			textIO.getTextTerminal().println("You have successfully logged out!");
 			MainClassForERS.loginForm();

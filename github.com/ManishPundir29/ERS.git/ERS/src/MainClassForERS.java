@@ -1,4 +1,6 @@
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
@@ -13,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
 
 import org.beryx.textio.TextIO;
@@ -21,16 +24,30 @@ import org.beryx.textio.TextIoFactory;
 import oracle.jdbc.OracleTypes;
 
 public class MainClassForERS {
+	private static Properties prop;
+	  static{
+	        InputStream is = null;
+	        try {
+	            prop = new Properties();
+	            is = MainClassForERS.class.getResourceAsStream("jdbc.properties");
+	            prop.load(is);
+	        } catch (FileNotFoundException e) {
+	            e.printStackTrace();
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
 
-	public static Scanner sc = new Scanner(System.in);
-
-	public static String jdbcUrl = "jdbc:oracle:thin:@localhost:1521:xe";
-	public static String username = "empdb";
-	public static String password = "root";
 	public static Connection con = getDatabaseConnection();
 	public static TextIO textIO = TextIoFactory.getTextIO();
-	public static String sqlForGetUserDetail = "CALL `ers`.`getUserDetails_sp`(?, ?,?)";
 	public static boolean flag = false;
+
+    
+  
+    public static String getPropertyValue(String key){
+        return prop.getProperty(key);
+    }
+	
 
 	public static void main(String[] args) throws SQLException, IOException, ParseException {
 		// make color of text white
@@ -80,7 +97,7 @@ public class MainClassForERS {
 		}
 	}
 
-	private static void homePage(LoginMaster loginMaster) throws SQLException, IOException, ParseException {
+	static void homePage(LoginMaster loginMaster) throws SQLException, IOException, ParseException {
 
 		textIO.getTextTerminal().println("Welcome " + loginMaster.getRole() + ", User ID " + loginMaster.getUserid());
 
@@ -95,6 +112,11 @@ public class MainClassForERS {
 		 */
 		case REGULATION_AND_LEGISLATION_MENU:
 			goToRL(loginMaster);
+			break;
+			
+			
+		case COMPLIANCE_TRACKING:
+			ComplianceTracking.goToCT( loginMaster, textIO);
 			break;
 
 		case LOGOUT:
@@ -131,6 +153,11 @@ public class MainClassForERS {
 			viewRL(loginMaster, textIO);
 			goToRL(loginMaster);
 			break;
+			
+		/*
+		 * case UPDATE_RL: updateComment(loginMaster, textIO); goToRL(loginMaster);
+		 * break;
+		 */
 
 		case BACK_TO_MAIN_MENU:
 			textIO.getTextTerminal().printf("\nGO BACK TO MAIN MENU!\n--------------------------");
@@ -152,6 +179,76 @@ public class MainClassForERS {
 
 	}
 
+	private static void updateComment(LoginMaster loginMaster, TextIO textIO) {
+		// select the regulation assigned to them and then update the comment 
+
+
+		String SQL_INSERT="select c.complianceid,c.rltype,c.details as description,c.createdate,d.department_nm,s.comments,s.empid from statusreport s\r\n" + 
+				" left join \r\n" + 
+				" COMPLIANCE c on (c.complianceid = s.complianceid)\r\n" + 
+				" left join \r\n" + 
+				" department d on (c.department_id = d.department_id) order by s.empid ";
+		
+		List<Integer> list = new ArrayList<>();
+		int empid = 0;
+		try (Connection conn = DriverManager.getConnection(getPropertyValue("db.url"), getPropertyValue("db.username"), getPropertyValue("db.password"));
+				Statement statement = conn.createStatement();
+				PreparedStatement preparedStatement = conn.prepareStatement(SQL_INSERT)) {
+
+			ResultSet resultSet = preparedStatement.executeQuery();
+
+			textIO.getTextTerminal().printf("\nCOMPLIANCE LIST\n--------------\n");
+
+			while (resultSet.next()) {
+				if(!list.contains(resultSet.getInt("empid")))
+				textIO.getTextTerminal().println("EMPLOYEE ID :: "+resultSet.getInt("empid"));
+				RegulationLegislationView obj = new RegulationLegislationView();
+				obj.setRlId(resultSet.getInt("complianceid"));
+				obj.setRlType(resultSet.getString("RLTYPE"));
+				obj.setDescription(resultSet.getString("description"));
+				obj.setCreationDate(resultSet.getDate("CREATEDATE"));
+				obj.setDepartment(resultSet.getString("department_nm"));
+				obj.setStatus(resultSet.getString("comments"));
+				textIO.getTextTerminal().println(obj.toString());
+				
+				list.add(resultSet.getInt("empid"));
+			}
+			
+			
+			
+			boolean flag = true;
+			do {
+				long choose = textIO.newIntInputReader().read("---------------------------\nSELECT THE EMPLOYEE ID:");
+				
+				for (Integer emp : list) {
+					if (emp == (int)choose) {
+						empid = emp;
+						flag = false;
+					}
+				}
+				if(flag==true)
+				textIO.getTextTerminal().printf("\nWRONG CHOICE. CHOOSE AGAIN...");
+
+			} while (flag);
+			
+			//get the status report of selected empid
+			RLForm.updatecommentanddatebyempid(empid, textIO, loginMaster);
+		} catch (SQLException e) {
+			System.err.format("SQL State: %s\t%s", e.getSQLState(), e.getMessage());
+			e.printStackTrace();
+			textIO.getTextTerminal()
+					.printf("\nSomething went wrong while getting details of all COMPLIANCE.. Try again..\n");
+			// return false;
+		} catch (Exception e) {
+			e.printStackTrace();
+			textIO.getTextTerminal()
+					.printf("\nSomething went wrong while getting details of all COMPLIANCE.. Try again..\n");
+			// return false;
+		}
+	}
+
+
+
 	static void viewRL(LoginMaster loginMaster,TextIO textIO) {
 	
 		String SQL_INSERT="select distinct c.complianceid,c.rltype,c.details as description,c.createdate,d.department_nm,s.comments from statusreport s\r\n" + 
@@ -160,7 +257,7 @@ public class MainClassForERS {
 				" left join \r\n" + 
 				" department d on (c.department_id = d.department_id) where empid=?";
 		
-		try (Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "empdb", "root");
+		try (Connection conn = DriverManager.getConnection(getPropertyValue("db.url"), getPropertyValue("db.username"), getPropertyValue("db.password"));
 				Statement statement = conn.createStatement();
 				PreparedStatement preparedStatement = conn.prepareStatement(SQL_INSERT)) {
 
@@ -203,7 +300,7 @@ public class MainClassForERS {
 				"left join\r\n" + 
 				"department d on (s.department_id = d.department_id) where empid=? order by s.statusrptid";
 		
-		try (Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "empdb", "root");
+		try (Connection conn = DriverManager.getConnection(getPropertyValue("db.url"), getPropertyValue("db.username"), getPropertyValue("db.password"));
 				Statement statement = conn.createStatement();
 				PreparedStatement preparedStatement = conn.prepareStatement(SQL_INSERT)) {
 
@@ -527,10 +624,7 @@ public class MainClassForERS {
 	static void saveEmloyee(Employee emp, int deptId, TextIO textIO2) throws SQLException {
 		int i;
 
-	//	textIO.getTextTerminal().printf("Department ID:" + deptId + " Date:" + emp.getDob() + "\n");
-		// Statement stmt=con.createStatement();
-		// ResultSet rs=stmt.executeQuery("insert into employees
-		// (firstname,lastname,dob,email,department_id) values (?,?,?,?,?)");
+	
 		PreparedStatement stmt = con.prepareStatement(
 				"insert into employees (empid,firstname,lastname,dob,email,department_id) values (EMPLOYEES_SEQ.NEXTVAL,?,?,?,?,?)");
 		stmt.setString(1, emp.getFirstname());
@@ -553,7 +647,7 @@ public class MainClassForERS {
 
 		String runSP = "{ call getUserDetails_sp(?,?,?) }";
 
-		try (Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "empdb", "root");
+		try (Connection conn = DriverManager.getConnection(getPropertyValue("db.url"), getPropertyValue("db.username"), getPropertyValue("db.password"));
 				Statement statement = conn.createStatement();
 				CallableStatement callableStatement = conn.prepareCall(runSP)) {
 
@@ -593,8 +687,8 @@ public class MainClassForERS {
 	public static Connection getDatabaseConnection() {
 		Connection conn = null;
 		try {
-			Class.forName("oracle.jdbc.driver.OracleDriver");
-			conn = DriverManager.getConnection(jdbcUrl, username, password);
+			Class.forName(getPropertyValue("db.driver"));
+			conn = DriverManager.getConnection(getPropertyValue("db.url"), getPropertyValue("db.username"),  getPropertyValue("db.password"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return conn;

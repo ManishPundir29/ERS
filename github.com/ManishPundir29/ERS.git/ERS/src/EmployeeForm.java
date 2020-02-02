@@ -654,7 +654,7 @@ ChooseForEdit empChoice = textIO.newEnumInputReader(ChooseForEdit.class).read("\
 		switch (empChoice) {
 		case SUBMIT:
 			MainClassForERS.saveEmloyee(emp,(int)deptId,textIO);
-			textIO.getTextTerminal().printf("\nADDED NEW EMPLOYEE\n------------------");
+			textIO.getTextTerminal().printf("\nADDED NEW EMPLOYEE\n------------------\n");
 			displayEmployee(textIO);
 			goToEmployeeFormPage(loginMaster, textIO);
 			break;
