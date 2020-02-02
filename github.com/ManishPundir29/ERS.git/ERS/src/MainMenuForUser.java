@@ -1,0 +1,5 @@
+
+public enum MainMenuForUser {
+	EMPLOYEES_MENU, REGULATION_AND_LEGISLATION_MENU, LOGOUT, EXIT;
+
+}

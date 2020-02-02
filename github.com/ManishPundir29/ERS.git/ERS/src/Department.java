@@ -20,7 +20,7 @@ public class Department {
 	}
 	@Override
 	public String toString() {
-		return "Department [department_id=" + department_id + ", department_nm=" + department_nm + "]";
+		return "[DEPARTMENT ID : " + department_id + "| DEPARTMENT NAME : " + department_nm + "]";
 	}
 	
 }

@@ -1,0 +1,5 @@
+
+public enum EmployeeFieldChoice {
+	FIRST_NAME, LAST_NAME, DOB, EMAIL,BACK_TO_EMPLOYEE_MENU, BACK_TO_MAIN_MENU, LOGOUT, EXIT
+
+}

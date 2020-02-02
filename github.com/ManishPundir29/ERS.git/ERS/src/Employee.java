@@ -1,10 +1,11 @@
+import java.sql.Date;
 
 public class Employee {
 
 	private int empid;
 	private String firstname;
 	private String lastname;
-	private String dob;
+	private Date dob;
 	private String email;
 	private String department;
 	
@@ -22,10 +23,10 @@ public class Employee {
 	public void setLastname(String lastname) {
 		this.lastname = lastname;
 	}
-	public String getDob() {
+	public Date getDob() {
 		return dob;
 	}
-	public void setDob(String dob) {
+	public void setDob(Date dob) {
 		this.dob = dob;
 	}
 	public String getEmail() {
@@ -43,10 +44,15 @@ public class Employee {
 
 	@Override
 	public String toString() {
-		return "Employee [firstname=" + firstname + ", lastname=" + lastname + ", dob=" + dob + ", email=" + email
-				+ ", department=" + department + "]";
+		return "[First Name : " + firstname + "| Last Name : " + lastname + "| Dob : " + dob + "| Email : " + email
+				+ "| Department : " + department + "]";
 	}
 
+	public String displayEmployeeObject() {
+		return "[EMP ID : "+ empid + "| First Name : " + firstname + "| Last Name : " + lastname + "| Dob : " + dob + "| Email : " + email
+				+ "| Department : " + department + "]";
+	}
+	
 	public int getEmpid() {
 		return empid;
 	}

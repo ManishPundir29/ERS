@@ -1,10 +1,11 @@
-import java.util.Date;
+import java.sql.Date;
 
 public class RegulationLegislation {
-
+	
+	private int rlId;
 	private String rlType;
 	private String rlDetails;
-	private String creationDate;
+	private Date creationDate;
 	private String department;
 	public RegulationLegislation() {}
 	public String getRlType() {
@@ -19,10 +20,10 @@ public class RegulationLegislation {
 	public void setRlDetails(String rlDetails) {
 		this.rlDetails = rlDetails;
 	}
-	public String getCreationDate() {
+	public Date getCreationDate() {
 		return creationDate;
 	}
-	public void setCreationDate(String creationDate) {
+	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
 	}
 	public String getDepartment() {
@@ -33,8 +34,14 @@ public class RegulationLegislation {
 	}
 	@Override
 	public String toString() {
-		return "RegulationLegislation [rlType=" + rlType + ", rlDetails=" + rlDetails + ", creationDate=" + creationDate
-				+ ", department=" + department + "]";
+		return " [RL Id : "+ rlId +"| RL Type : " + rlType + "| RL Details : " + rlDetails + "| Creation Date : " + creationDate
+				+ "| Department : " + department + "]";
+	}
+	public int getRlId() {
+		return rlId;
+	}
+	public void setRlId(int i) {
+		this.rlId = i;
 	}
 	
 }
